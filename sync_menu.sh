@@ -1,16 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
-BACKUPS_PATH="${HOME}/Backups"
+# Путь к каталогу со всеми бэкапами
+BACKUPS_PATH="${HOME}/Backups" 
+# Путь к базе паролей keepass на пк
+PC_KP_PATH="${HOME}/.keepass/keepassdb.kdbx"
+# Путь к базе паролей keepass на android
+PHONE_KP_PATH="/sdcard/.keepass/keepassdb.kdbx"
+# Путь к каталогу с бэкапами Aegis на android
+PHONE_AEGIS_PATH="/sdcard/aegis_backups"
+# Кол-во сохраняемых файлов (если их больше, то самые старые - удаляются)
+KEEP_COUNT=5
+
 BACKUPS_AEGIS_PATH="${BACKUPS_PATH}/Aegis"
 BACKUPS_KP_PATH="${BACKUPS_PATH}/KeePass"
 TEMP_KP_PATH="${BACKUPS_PATH}/temp.kdbx"
-PC_KP_PATH="${HOME}/.keepass/keepassdb.kdbx"
-PC_KP_OLD_PATH="${HOME}/.keepass/keepassdb.old.kdbx"
-PHONE_KP_PATH="/sdcard/.keepass/keepassdb.kdbx"
-PHONE_KP_OLD_PATH="/sdcard/.keepass/keepassdb.old.kdbx"
-PHONE_AEGIS_PATH="/sdcard/aegis_backups"
-KEEP_COUNT=5
 CANARY_FILE="${BACKUPS_PATH}/.canary.enc"
 CANARY_TOKEN="VERIFY_SECRET_TOKEN_V1"
 
@@ -89,7 +93,7 @@ sync_aegis() {
 sync_keepass_1() {
     adb_pull_new "Скачивание базы KeePass с телефона" "$PHONE_KP_PATH" "$TEMP_KP_PATH"
     echo "[N] Сохранение старой базы KeePass на пк..."
-    cp -v "$PC_KP_PATH" "$PC_KP_OLD_PATH"
+    cp -v "$PC_KP_PATH" "${PC_KP_PATH%.*}.old.${PC_KP_PATH##*.}"
     echo "[N] Слияние баз KeePass..."
     while true; do
         if keepassxc-cli merge -s "$PC_KP_PATH" "$TEMP_KP_PATH"; then
@@ -102,7 +106,7 @@ sync_keepass_1() {
 # Синхронизация базы KeePass на телефон и создание бэкапа
 sync_keepass_2() {
     echo "[N] Сохранение старой базы KeePass на телефоне..."
-    if ! adb -d shell cp -v "$PHONE_KP_PATH" "$PHONE_KP_OLD_PATH"; then
+    if ! adb -d shell cp -v "$PHONE_KP_PATH" "${PHONE_KP_PATH%.*}.old.${PHONE_KP_PATH##*.}"; then
         echo "[E] Ошибка при записи на телефон."
         pause_and_exit 1
     fi

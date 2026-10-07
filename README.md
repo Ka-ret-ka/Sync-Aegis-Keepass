@@ -1,5 +1,5 @@
 # Sync-Aegis-Keepass
-Этот скрипт пригодится тем, кто использует KeePass в качестве менеджера паролей (на linux и на android) и Aegis в качестве 2FA.
+Этот скрипт пригодится тем, кто использует KeePass (на linux и на android) и Aegis Authenticator.
 
 ### Возможности:
 1. Копирование всех бэкапов Aegis с android.
